@@ -210,3 +210,41 @@ from book inner join librarys on librID=libraryID;
 --Columns needed: LoanID, PaymentDate, Amount, PaymentMethod, Loan Status
 select PaymentDate,Amount,Method,loanStatuse from Payments inner join loans on LoanDa=loanDate;
 
+--Part B: Three-Table INNER JOINs
+
+--Task 2.7: Show member names, book titles, and loan dates together.
+--Columns needed: Member FullName, Book Title, LoanDate, DueDate, Status
+--Hint: You need Member, Loan, and Book tables. Join Member to Loan, then Loan to Book
+
+-- Goal: Show member names, book titles, and loan details.
+-- In my database design, there is no direct relationship between members and loans.
+-- Therefore, I used the Borrowings table as a junction table because:
+-- personID links to members
+-- Loandat links to loans
+-- bookSSN links to book
+-- I used INNER JOIN to return only the records that have matching data in all tables.
+
+select MfullName,bookTitle,loanDate,DueDate,loanStatuse from members inner join Borrowings on memberId=personID
+inner join loans on loanDate=Loandat
+inner join book on bookID=bookSSN;
+
+
+-- Task 2.8
+-- In my database design, the required data (member, book, and review)
+-- is already combined using the ReviewBook table.
+-- This table links members, books, and reviews together,
+-- so the relationship has already been implemented during database design.
+-- Therefore, no additional restructuring was needed; only retrieval queries are required.
+
+--Task 2.9: Show books with their library name and location.
+--Columns needed: Book Title, Genre, Library Name, Library Location, Library ContactNumber
+
+select bookTitle,bookGener,libraryName,libLocation,LibContactNum from book inner join Librarys on librID=libraryID
+
+--Task 2.10: Display complete loan information: member name, book title, loan dates, and status.
+--Columns needed: Member FullName, Email, Book Title, Genre, LoanDate, DueDate, ReturnDate, Status
+-- Used Borrowings to link members, books, and loans using INNER JOIN.
+select MfullName,MemberEmail,bookTitle,bookGener,loanDate,DueDate,returnDate,loanStatuse from Borrowings
+inner join members on personID = memberID
+inner join loans on Loandat = loanDate
+inner join book on bookSSN = bookID;
