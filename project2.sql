@@ -394,3 +394,30 @@ on Borrowings.Loandat = loans.loanDate
 full outer join book
 on Borrowings.bookSSN = book.bookID;
 
+--Session 6: Combining Multiple JOIN Types
+--task 6.1: Show all ACTIVE loans (INNER JOIN) with member info and payment info (LEFT JOIN for payments).
+--Columns: Member FullName, LoanDate, DueDate, Status, PaymentDate, Amount
+--Logic: INNER JOIN Member (only show actual loans), LEFT JOIN Payment (show payment if exists)
+select members.MfullName,
+       loanDate,DueDate,loanStatuse,
+       PaymentDate,Amount
+from loans inner join Borrowings on loans.loanDate = Borrowings.Loandat
+inner join members on Borrowings.personID = members.memberID
+left join Payments on loans.loanDate = Payments.LoanDa;
+-- Used inner join to get actual loans with members,
+-- and left join to include payment information if available.
+
+--Task 6.2: Display all books (INNER JOIN Library) and their reviews (LEFT JOIN Review).
+--Columns: Library Name, Book Title, Genre, Rating, Comments
+select librarys.libraryName,book.bookTitle,  book.bookGener,reviews.rating, reviews.comments 
+from book inner join librarys on book.librID = librarys.libraryID
+left join ReviewBook on book.bookID = ReviewBook.BookNum
+left join reviews on ReviewBook.ReviewID = reviews.ReviewID;
+
+--task 6.3
+select members.MfullName, book.bookTitle,librarys.libraryName,loans.loanDate, loans.returnDate
+from members
+inner join Borrowings on members.memberID = Borrowings.personID
+inner join loans on Borrowings.Loandat = loans.loanDate
+inner join book on Borrowings.bookSSN = book.bookID
+inner join librarys on book.librID = librarys.libraryID;
