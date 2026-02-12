@@ -333,14 +333,18 @@ PRIMARY KEY (BookNum, personNum, ReviewID);
 ALTER TABLE ReviewBook
 DROP COLUMN feedbackDate;
 
+--Task 3.6: Find books that have NEVER been reviewed.
+--Columns needed: Book Title, Genre, Price
+--Hint: LEFT JOIN with WHERE R.ReviewID IS NULL
+
+select bookTitle,bookGener,price from book left join ReviewBook on bookID=BookNum where ReviewBook.ReviewID is null
 
 
+--Task 3.7: Show ALL books with member names who reviewed them (if reviewed).
+--Columns needed: Book Title, Member FullName, Rating, Comments
+--Challenge: This needs a three-table join: Book LEFT JOIN Review LEFT JOIN Member
 
-
-
-
-
-
-
-
+select bookTitle,MfullName,rating,comments from book left join ReviewBook on bookID=BookNum
+left join reviews on ReviewBook.ReviewID=reviews.ReviewID 
+left join members on ReviewBook.personNum = members.memberID;
 
