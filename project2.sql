@@ -372,3 +372,25 @@ left join librarys on staff.libID = librarys.libraryID;
 --right join
 select staff.staffFullName, staff.staffPosition, librarys.libraryName from librarys
 right join staff on staff.libID = librarys.libraryID;
+
+--Session 5: FULL OUTER JOIN
+--Task 5.1: Show ALL books and ALL reviews (whether matched or not).
+--Columns needed: Book Title, Rating, Comments
+select bookTitle,rating,comments from book full outer join ReviewBook on bookID=BookNum 
+full outer join reviews on reviews.ReviewID=ReviewBook.ReviewID
+
+--task 5.3 Show complete data: ALL members and ALL books (through loans).
+--Challenge: This requires multiple FULL OUTER JOINs
+select members.MfullName,
+       book.bookTitle,
+       loans.loanDate,
+       loans.DueDate,
+       loans.loanStatuse
+from members
+full outer join Borrowings
+on members.memberID = Borrowings.personID
+full outer join loans
+on Borrowings.Loandat = loans.loanDate
+full outer join book
+on Borrowings.bookSSN = book.bookID;
+
