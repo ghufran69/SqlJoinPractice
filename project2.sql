@@ -248,3 +248,99 @@ select MfullName,MemberEmail,bookTitle,bookGener,loanDate,DueDate,returnDate,loa
 inner join members on personID = memberID
 inner join loans on Loandat = loanDate
 inner join book on bookSSN = bookID;
+
+--Practice Tasks - LEFT JOIN
+--Task 3.1: Show ALL books and their reviews (if any). Books without reviews should still appear.
+--Columns needed: Book Title, Genre, Rating, Comments
+--Expected: All 18 books should appear, even if some have no reviews
+--book-ReviewBook-reviewes
+select bookTitle,bookGener,rating,comments from book left join ReviewBook on bookID=BookNum
+left join reviews on feedbackDate=reviewDate
+
+--Task 3.2: Display ALL members with their loan information (if they have any loans).
+-- Columns needed: Member FullName, Email, LoanDate, DueDate, Status
+--member-Borrowings-loans
+-- Used left join to show all members and their loan information, using Borrowings to link members and loans.
+
+select MfullName,MemberEmail,loanDate,DueDate,loanStatuse from members left join Borrowings on memberId=personID
+left join loans on loanDate=Loandat
+
+--Task 3.3: Show ALL loans with payment information (if any). Loans without payments should appear.
+--Columns needed: LoanID, LoanDate, Status, PaymentDate, Amount
+select loans.loanDate, loans.loanStatuse, Payments.PaymentDate, Payments.Amount
+from loans LEFT JOIN Payments on loans.loanDate = Payments.LoanDa;
+
+--Task 3.4: Display ALL libraries with their staff (if any).
+--Columns needed: Library Name, Location, Staff FullName, Position
+
+select libraryName,libLocation,staffFullName, staffPosition from librarys left join staff on librarys.libraryID=staff.libID
+
+--Task 3.5: Find members who have NEVER borrowed a book (using LEFT JOIN with WHERE clause).
+--Hint: Use LEFT JOIN, then add WHERE L.LoanID IS NULL
+select members.MfullName, members.MemberEmail
+from members left join Borrowings on members.memberID = Borrowings.personID
+where Borrowings.personID is null;
+-- No results appeared because all members have borrowing records in the current dataset.
+
+-- I modified the database design by adding ReviewID as the primary key
+-- and updated ReviewBook to reference ReviewID instead of reviewDate.
+-- This makes the relationship more reliable and easier to join.
+
+EXEC sp_help 'ReviewBook';
+ALTER TABLE ReviewBook
+DROP CONSTRAINT FK__ReviewBoo__feedb__4B7734FF;
+
+EXEC sp_help 'reviews';
+ALTER TABLE reviews
+DROP CONSTRAINT PK__reviews__A951659B1FE56372;
+
+ALTER TABLE reviews
+ADD ReviewID INT IDENTITY(1,1) NOT NULL;
+SELECT * FROM reviews;
+
+ALTER TABLE reviews
+ADD CONSTRAINT PK_reviews PRIMARY KEY (ReviewID);
+
+ALTER TABLE ReviewBook
+ADD ReviewID INT;
+
+UPDATE ReviewBook
+SET ReviewID = reviews.ReviewID
+FROM ReviewBook
+JOIN reviews ON ReviewBook.feedbackDate = reviews.reviewDate;
+
+ALTER TABLE ReviewBook
+ADD CONSTRAINT FK_ReviewBook_ReviewID
+FOREIGN KEY (ReviewID) REFERENCES reviews(ReviewID);
+
+ALTER TABLE ReviewBook
+DROP COLUMN feedbackDate;
+
+ALTER TABLE ReviewBook
+DROP CONSTRAINT PK__ReviewBo__189E2AE233A1CAE0;
+
+ALTER TABLE ReviewBook
+ADD CONSTRAINT PK_ReviewBook
+PRIMARY KEY (BookNum, personNum, ReviewID);
+
+ALTER TABLE ReviewBook
+ALTER COLUMN ReviewID INT NOT NULL;
+
+ALTER TABLE ReviewBook
+ADD CONSTRAINT PK_ReviewBook
+PRIMARY KEY (BookNum, personNum, ReviewID);
+
+ALTER TABLE ReviewBook
+DROP COLUMN feedbackDate;
+
+
+
+
+
+
+
+
+
+
+
+
