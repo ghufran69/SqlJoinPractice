@@ -348,3 +348,27 @@ select bookTitle,MfullName,rating,comments from book left join ReviewBook on boo
 left join reviews on ReviewBook.ReviewID=reviews.ReviewID 
 left join members on ReviewBook.personNum = members.memberID;
 
+--Practice Tasks - RIGHT JOIN
+
+--Task 4.1: Rewrite Task 3.1 using RIGHT JOIN instead of LEFT JOIN.
+--Original (LEFT JOIN): Book LEFT JOIN Review
+--Rewrite (RIGHT JOIN): Review RIGHT JOIN Book
+select book.bookTitle, book.bookGener, reviews.rating, reviews.comments FROM reviews
+right join ReviewBook on reviews.ReviewID = ReviewBook.ReviewID
+right join book on ReviewBook.BookNum = book.bookID;
+
+--Task 4.2: Show ALL members with their loans using RIGHT JOIN.
+--Hint: FROM Loan L RIGHT JOIN Member M
+
+--Task 4.3: Display ALL books using RIGHT JOIN with Library table.
+--Columns needed: Library Name, Book Title, Genre
+select libraryName,bookTitle,bookGener from librarys right join book on libraryID=librID
+
+--Task 4.4: Compare the results: Write the same query using both LEFT JOIN and RIGHT JOIN.
+--Goal: Show all staff with library names
+--left join
+select staff.staffFullName, staff.staffPosition, librarys.libraryName from staff
+left join librarys on staff.libID = librarys.libraryID;
+--right join
+select staff.staffFullName, staff.staffPosition, librarys.libraryName from librarys
+right join staff on staff.libID = librarys.libraryID;
