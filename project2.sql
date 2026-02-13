@@ -421,3 +421,131 @@ inner join Borrowings on members.memberID = Borrowings.personID
 inner join loans on Borrowings.Loandat = loans.loanDate
 inner join book on Borrowings.bookSSN = book.bookID
 inner join librarys on book.librID = librarys.libraryID;
+
+part 7:
+--Session 7: Real-World Challenge Queries
+--These challenges combine everything you've learned. Read each requirement
+--carefully and determine which JOIN type(s) to use.
+--Challenge 7.1: Library Performance Report
+--Create a report showing: Library Name, Total Books, Total Staff, Total Loans
+--Hint: You'll need to JOIN multiple tables and use COUNT
+ --library--book--staff--loans
+ select libraryName ,
+ COUNT(distinct book.bookID) as totalbook,
+ COUNT(distinct staff.staffID) as totalStaff,
+ COUNT(distinct loans.loanDate) as totalLoans
+ from librarys 
+ left join book on librarys.libraryID=book.librID
+ left join staff on librarys.libraryID=staff.libID
+ left join Borrowings on book.bookID = Borrowings.bookSSN
+ left join loans on Borrowings.Loandat = loans.loanDate
+ group by librarys.libraryName;
+ -- Used LEFT JOIN and COUNT to generate a library performance report
+-- showing total books, staff, and loans per library.
+
+ --Challenge 7.2: Member Activity Summary
+--Show ALL members with: FullName, Email, Total Loans, Total Reviews Written
+--Hint: LEFT JOIN to include members with zero loans/reviews
+select MfullName,MemberEmail ,
+count(distinct loans.loanDate) as totalLoans,
+count(distinct reviews.ReviewID) as totalReview 
+from members left join Borrowings on members.memberId=Borrowings.personID
+
+left join  loans on Borrowings.Loandat=loans.loanDate
+left join ReviewBook on ReviewBook.personNum=members.memberId
+left join reviews on ReviewBook.ReviewID=reviews.ReviewID
+group by members.MfullName,members.MemberEmail 
+-- Used LEFT JOIN and COUNT to show all members with total loans and total reviews.
+
+--Challenge 7.3: Book Popularity Analysis
+--Display: Book Title, Library Name, Times Borrowed, Average Rating, Total Reviews
+--Hint: Need Book, Library, Loan (count), Review (avg and count)
+select book.bookTitle,
+librarys.libraryName,
+COUNT(DISTINCT Borrowings.Loandat) as TimesBorrowed,
+AVG(reviews.rating) as AverageRating,
+COUNT(DISTINCT reviews.ReviewID) as TotalReviews
+from book
+left join librarys on book.librID = librarys.libraryID
+left join Borrowings on book.bookID = Borrowings.bookSSN
+left join ReviewBook on book.bookID = ReviewBook.BookNum
+left join reviews on ReviewBook.ReviewID = reviews.ReviewID
+group by book.bookTitle, librarys.libraryName;
+
+--Challenge 7.4: Overdue Books Report
+--Show all overdue loans with: Member Name, Email, Book Title, Library Name, Days Overdue, Fine Paid (if any)
+---- For testing the overdue report, I updated one loan status to 'overdue'
+-- so the query would return results and verify the report logic.
+update loans
+set loanStatuse = 'overdue'
+where loanDate = '2024-02-01';
+SELECT members.MfullName,
+members.MemberEmail,
+book.bookTitle,
+librarys.libraryName,
+DATEDIFF(day, loans.DueDate, GETDATE()) AS DaysOverdue,
+Payments.Amount AS FinePaid
+FROM loans
+INNER JOIN Borrowings ON loans.loanDate = Borrowings.Loandat
+INNER JOIN members ON Borrowings.personID = members.memberID
+INNER JOIN book ON Borrowings.bookSSN = book.bookID
+INNER JOIN librarys ON book.librID = librarys.libraryID
+LEFT JOIN Payments ON loans.loanDate = Payments.LoanDa
+WHERE loans.loanStatuse = 'overdue';
+
+-- used inner join to get overdue loans and left join to include payment information if available
+
+--Challenge 7.5: Complete Member Loan History
+--Create a detailed view: Member Name, Book Title, Genre, Library Location, Loan Date,
+--Return Date, Days Borrowed, Rating Given (if reviewed)
+--Challenge: This requires joining 5+ tables with mixed JOIN types!
+SELECT members.MfullName, book.bookTitle,book.bookGener,librarys.libLocation,loans.loanDate,loans.returnDate,
+DATEDIFF(day, loans.loanDate, loans.returnDate) AS DaysBorrowed,
+reviews.rating
+FROM members
+INNER JOIN Borrowings ON members.memberID = Borrowings.personID
+INNER JOIN loans ON Borrowings.Loandat = loans.loanDate
+INNER JOIN book ON Borrowings.bookSSN = book.bookID
+INNER JOIN librarys ON book.librID = librarys.libraryID
+LEFT JOIN ReviewBook ON book.bookID = ReviewBook.BookNum
+LEFT JOIN reviews ON ReviewBook.ReviewID = reviews.ReviewID;
+
+--Challenge 7.6: Books Never Borrowed
+--Find books that exist but have NEVER been borrowed. Show: Book Title, Genre, Price,
+--Library Name
+--Hint: Book LEFT JOIN Loan WHERE LoanID IS NULL
+
+-- Added a new book without a borrowing record to test the query
+-- for books that have never been borrowed.
+
+INSERT INTO book (bookISBN, bookTitle, bookGener, bookShelfLocation, price, librID, memID)
+VALUES ('9781111111199','Test Book Never Borrowed','fiction','Z1',4.500,1,NULL);
+
+select bookID,bookTitle,bookGener,price,libraryName from book
+left join Borrowings on Borrowings.bookSSN =book.bookID 
+left join librarys on book.librID=librarys.libraryID where Borrowings.bookSSN is null
+
+--Challenge 7.7: Members With No Activity
+--Find members who have NEVER borrowed a book AND NEVER written a review.
+--Hint: Need two LEFT JOINs with WHERE both are NULL
+--add member
+INSERT INTO members (MfullName, MemberEmail, MemberPhonNum, MembershipStartDate)
+VALUES ('Test Member 2','test2@gmail.com','90000001','2024-02-01');
+
+ select memberId,MemberEmail from members 
+ left join Borrowings on members.memberId=Borrowings.personID  
+ left join ReviewBook on ReviewBook.personNum=members.memberId where Borrowings.personID is null and ReviewBook.personNum is null
+
+ --Challenge 7.8: Staff Workload Analysis
+--Show: Staff Name, Position, Library Name, Number of Books in Library, Number of Active Loans
+--Complex: Requires grouping and counting across multiple joins
+select staff.staffFullName,staff.staffPosition,librarys.libraryName,
+
+count(DISTINCT book.bookID)as NumbersOfBook,
+count(DISTINCT loans.loanDate )as ActiveLoans
+from staff
+left join librarys on staff.libID=librarys.libraryID 
+left join book on librarys.libraryID =book.librID
+left join Borrowings on Borrowings.bookSSN=book.bookID
+left join loans on loans.loanDate= Borrowings.Loandat and loans.loanStatuse='issued'
+group by staff.staffFullName,staff.staffPosition,librarys.libraryName
