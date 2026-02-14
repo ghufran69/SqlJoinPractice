@@ -1,4 +1,4 @@
-    
+﻿    
 
 -- DAY 1
 --part 1 ,task 1.1 Display all records from the Libraries table
@@ -549,3 +549,341 @@ left join book on librarys.libraryID =book.librID
 left join Borrowings on Borrowings.bookSSN=book.bookID
 left join loans on loans.loanDate= Borrowings.Loandat and loans.loanStatuse='issued'
 group by staff.staffFullName,staff.staffPosition,librarys.libraryName
+
+
+
+--SQL Aggregation Functions, GROUP BY & HAVING
+
+--Task 1.1: Count the total number of books in the Book table.
+select count(*) as tatalNoBook from book
+
+--Task 1.2: Count how many members are registered in the system.
+--Table: Member
+select count(*) as TotalMembers from members;
+
+--Task 1.3: Find the total sum of all book prices combined.
+--Column to sum: Price in the Book table
+--Function to use: SUM
+select sum(price) as totalSumPrice from book
+
+--Task 1.4: Calculate the average price of all books.
+--Function to use: AVG
+select avg(Price) as AvgBookPrice from Book;
+
+--Task 1.5: Find the cheapest book price AND the most expensive book price — both in the same single query.
+--Functions to use: MIN and MAX together
+--Expected result: 1 row — two columns side by side
+--Hint: You can write multiple aggregation functions in one SELECT: SELECT MIN(col) AS ..., MAX(col) AS
+select min(Price) as CheapestPrice, max(Price) as MostExpensivePrice from Book;
+
+
+--Task 1.6: Count how many loans currently have Status = 'Overdue'.
+--Hint: Add a WHERE clause to filter only the rows where Status = 'Overdue', then count them
+select count(*)as OverdueLoans from loans where loanStatuse='Overdue'
+
+--Task 1.7: Find the highest rating ever given in the Review table.
+--Column to use: Rating
+select max(rating) as HighestRating from reviews
+
+--Task 1.8: Find the lowest rating ever given in the Review table
+select min(rating) as lowestRating from reviews
+
+--Task 1.9: Calculate the total amount of all fines collected — the sum of every payment ever made.
+--Table: Payment
+--Column: Amount
+select sum(Amount) as TotalAmount from Payments
+
+--Task 1.10: Count how many loans have already been returned (meaning ReturnDate is NOT NULL).
+--Key concept: COUNT(column) skips NULL values. If you write COUNT(ReturnDate), rows
+--where ReturnDate is NULL will not be counted
+select count(returnDate) as ReturnedLoans from loans
+
+--Section 2 — GROUP BY
+--Task 2.1: Count how many books belong to each Genre.
+--Expected result: Four rows — one for Fiction, Non-fiction, Reference, Children \Columns in SELECT: Genre and COUNT(*)
+select bookGener ,count(*) as BookCount from book
+group by bookGener
+
+--Task 2.2: Count how many staff members work in each Library. Group by LibraryID.
+--Table: Staff
+select libID ,count(*)as staffCount from staff
+group by libID
+
+--Task 2.3: Count how many loans exist for each loan Status (Issued, Returned, Overdue).
+select loanStatuse, count(*) as loanCount from loans
+group by loanStatuse
+
+--Task 2.4: Calculate the average book price for each Genre.
+--Function to use: AVG(Price)
+select bookGener ,avg(price) as AvgBookPrice from book
+group by bookGener
+
+--Task 2.5: Find the total price (SUM) of all books in each Genre.
+select bookGener , sum(price) as totalPrice from book 
+group by bookGener 
+
+--Task 2.6: Find the most expensive book price (MAX) within each Genre.
+select bookGener, max(price) as MaxPrice from book
+group by bookGener
+
+--Task 2.7: Count how many reviews each rating value has received.
+--Table: Review
+--Group by: Rating
+--Expected result: One row per rating value (1, 2, 3, 4, 5) — showing how many times each was given
+select rating, count(*) as reviewCount  from reviews 
+group by rating
+
+--Task 2.8: Count how many books each Library owns. Group by LibraryID.
+--Table: Book
+select librID, count(*) as totalBook from book group by librID 
+
+--Task 2.9: Count how many loans each Member has made. Group by MemberID.
+--Table: Loan
+select personID, count(*) as LoanCount
+from Borrowings
+group by personID;
+
+
+--Task 2.10: Find the cheapest book (MIN Price) in each Genre
+select bookGener, min(Price) as MinPrice from book
+group by bookGener;
+
+--Part 2-B — GROUP BY with ORDER BY
+--Task 2.11: Count books per Genre, ordered from the genre with the most books down to the fewest.
+--Hint: Add ORDER BY after GROUP BY and reference your alias
+select bookGener,count(*) as bookCount from book 
+group by bookGener 
+order by bookCount desc;
+
+--Task 2.12: Show the average price per Genre, ordered from cheapest average to most expensive
+select bookGener,avg(price) as AVGPrice from book 
+group by bookGener 
+order by AVGPrice asc
+
+--Task 2.13: Count loans per Status and order the results alphabetically by Status name
+select loanStatuse, count(*) as LoanCount from loans 
+group by loanStatuse 
+order by loanStatuse  asc
+
+--Task 2.14: Show the total payment amount collected per PaymentMethod, ordered from the highest total to the lowest.
+select Method,sum(Amount)as totalPayment from Payments 
+group by Method  
+order by totalPayment desc
+
+--Task 2.15: Count how many reviews each book has received (group by BookID),
+--ordered so the most-reviewed book appears first.
+--Table: Review
+select BookNum,count(*) as ReviewCount from ReviewBook
+group by BookNum 
+order by ReviewCount desc
+
+
+--Section 3 — HAVING
+--Part 3-A — Simple HAVING Tasks
+--Task 3.1: Show only the genres that have MORE THAN 3 books.
+--Hint: GROUP BY Genre, then HAVING COUNT(*) > 3
+select bookGener ,count(*) as bookCount from book group by bookGener
+having count(*)>3
+
+--Task 3.2: Show only the libraries that have AT LEAST 1 staff members.
+--Table: Staff — group by LibraryID
+select libID,count(*) as staffcount from staff group by libID
+having count(*)>=1
+
+--Task 3.3: Show only the members (by MemberID) who have borrowed MORE THAN 0 book.
+--Table: Loan — group by MemberID
+select personID,count(*) as borrowcount from Borrowings group by personID
+having count(*)>0
+
+--Task 3.4: Show only the genres where the average book price is MORE THAN 30.
+--Hint: HAVING AVG(Price) > 10
+select bookGener,count(*) as AvgPrice from book group by bookGener 
+having Avg(price)>10
+
+--Task 3.5: Find books (by BookID) that have received AT LEAST 1 reviews.
+--Table: Review — group by BookID
+select BookNum, count(*) as ReviewCount from ReviewBook
+group by BookNum
+having count(*) >= 1;
+
+--Task 3.6: Show genres where the total sum of all book prices is MORE THAN 50.
+--Hint: HAVING SUM(Price) > 50
+select bookGener,sum(price) as totalPrice from book group by bookGener having sum(price)>50
+
+--Task 3.7: Find payment methods where the total collected amount is MORE THAN 5.
+--Table: Payment — group by PaymentMethod
+select Method, sum(Amount) as TotalAmount from Payments group by Method
+having sum(Amount) > 5;
+
+--Task 3.8: Show loan statuses that appear MORE THAN 3 times in the Loan table
+select loanStatuse, count(*) as LoanCount from loans group by loanStatuse
+having count(*) > 3;
+
+--Task 3.9: Show members (by MemberID) who have written AT LEAST 1 reviews.
+--Table: Review — group by MemberID
+select personNum, count(*) as ReviewCount from ReviewBook group by personNum
+having count(*) >= 1;
+
+--Task 3.10: Find libraries (by LibraryID) that own MORE THAN 1 books.
+select librID, count(*) as BookCount from book group by librID having count(*) > 1;
+
+--Part 3-B — WHERE and HAVING Together
+--Task 3.11: Count available books per genre (available means IsAvailable = 1). Show
+--only genres that have more than 1 available book.
+--Structure: WHERE filters rows → GROUP BY groups → HAVING filters groups
+  select bookGener,count(*) as AvailablebookCount from book where bookIsAvaibale =1
+  group by bookGener
+  having count(*)>1
+
+  --Task 3.12: Among Fiction and Children books only, show genres where the average price is above 15.
+--Hint: Use WHERE Genre IN ('Fiction', 'Children') then GROUP BY then HAVING AVG(Price) > 5
+select bookGener,avg(price) as avgPrice from book where  bookGener in ('fiction','children')
+group by bookGener 
+having  avg(price)>5
+
+--Task 3.13: Among Overdue and Issued loans only, count per member and show members with 1 active loan.
+--Hint: WHERE Status IN ('Overdue', 'Issued')
+select B.personID, count(*) as ActiveLoans from Borrowings B
+join loans L on B.Loandat = L.loanDate where L.loanStatuse in ('overdue','issued')
+group by B.personID
+having count(*) = 1;
+-- Count active loans (overdue or issued) per member
+-- using join between Borrowings and loans,
+-- showing only members with more than one active loan.
+
+--Task 3.14: Look only at reviews with Rating >= 3. Group by book and show books that
+--have at least 1 good reviews
+select RB.BookNum, count(*) as GoodReviews from ReviewBook RB
+join reviews R on RB.ReviewID = R.ReviewID where R.rating >= 3
+group by RB.BookNum
+having count(*) >= 1;
+
+--Task 3.15: Find genres that have more than 1 book priced below 20.
+--Hint: WHERE Price < 20 first, then group, then HAVING
+select bookGener, count(*) as CheapBooks from book where price < 20
+group by bookGener
+having count(*) > 1;
+
+
+--Section 4 — Aggregation with JOIN
+--ask 4.1: Show each library name alongside the number of books it owns.
+--Tables needed: Library and Book
+--Join condition: Library.LibraryID = Book.LibraryID
+--Hint: JOIN first, then GROUP BY LIB.LibraryID, LIB.Name, then COUNT(B.BookID)
+select L.libraryName, count(*) as BookCount from librarys L
+join book B on L.libraryID = B.librID
+group by L.libraryID, L.libraryName;
+
+--Task 4.2: Show each member's full name alongside their total number of loans.
+--Tables needed: Member and Loan
+--Join condition: Member.MemberID = Loan.MemberID
+select M.MfullName, count(*) as LoanCount
+from members M
+join Borrowings B on M.memberId = B.personID
+group by M.memberId, M.MfullName;
+
+--Show each book's title alongside the number of times it has been borrowed.
+Tables needed: Book and Loan
+--Join condition: Book.BookID = Loan.BookID
+select B.bookTitle, count(*) as BorrowCount from book B
+join Borrowings BR on B.bookID = BR.bookSSN
+group by B.bookID, B.bookTitle;
+
+--Show each book's title alongside its average review rating.
+Tables needed: Book and Review
+--Function: AVG(R.Rating)
+--Hint: Cast the rating for a cleaner decimal: AVG(CAST(R.Rating AS DECIMAL(3,2)))
+select B.bookTitle, avg(R.rating) as AvgRating from book B
+join ReviewBook RB on B.bookID = RB.BookNum
+join reviews R on RB.ReviewID = R.ReviewID
+group by B.bookID, B.bookTitle;
+
+--Task 4.5: Show each library name alongside the total value (SUM of Price) of all the books it owns.
+--Tables needed: Library and Book
+select L.libraryName, sum(B.price) as TotalValue from librarys L
+join book B on L.libraryID = B.librID
+group by L.libraryID, L.libraryName;
+
+--Task 4.6: Show each library name alongside the number of staff who work there.
+--Tables needed: Library and Staff
+select L.libraryName, count(*) as StaffCount from librarys L
+join staff S on L.libraryID = S.libID
+group by L.libraryID, L.libraryName;
+
+--Task 4.7: Show each member's full name alongside the total fine amount they have paid.
+--Tables needed: Member, Loan, and Payment — three tables
+--Hint: JOIN Member to Loan, then JOIN Loan to Payment, then GROUP BY member, then SUM(P.Amount)
+select M.MfullName, sum(P.Amount) as TotalFines
+from members M join Borrowings B on M.memberId = B.personID
+join loans L on B.Loandat = L.loanDate
+join Payments P on L.loanDate = P.LoanDa
+group by M.memberId, M.MfullName;
+
+--Task 4.8: Show each genre and the number of DISTINCT members who have borrowed books in that genre.
+--Tables needed: Book and Loan
+--Hint: COUNT(DISTINCT L.MemberID) — this avoids counting the same member twice if they borrowed multiple books in the same genre
+
+select B.bookGener, count(distinct BR.personID) as MemberCount from book B
+join Borrowings BR on B.bookID = BR.bookSSN
+group by B.bookGener;
+
+--Task 4.9: Show each book's title, how many times it was borrowed, and its average rating — all in one query.
+--Tables needed: Book, Loan, and Review
+--Hint: Use LEFT JOIN so that books with no loans and books with no reviews still appear in the result
+--Two aggregations: COUNT(DISTINCT L.LoanID) for borrows, AVG(CAST(R.Rating AS DECIMAL(3,2))) for rating
+select B.bookTitle,
+count(distinct BR.Loandat) as BorrowCount,
+avg(R.rating) as AvgRating
+from book B
+left join Borrowings BR on B.bookID = BR.bookSSN
+left join ReviewBook RB on B.bookID = RB.BookNum
+left join reviews R on RB.ReviewID = R.ReviewID
+group by B.bookID, B.bookTitle;
+
+--Task 4.10: Show each genre with three pieces of information: total number of books, number of available books, and average price.
+--Table: Book only — no JOIN needed for this one
+--Hint for available count: Use a CASE expression inside SUM: SUM(CASE WHEN IsAvailable = 1 THEN 1 ELSE 0 END)
+--book.Tbookid,book is available,
+select bookGener,count(*) as totalBook ,
+sum(case when bookIsAvaibale = 1 then 1 else 0 end ) as AvailableBooks,
+avg(price) as AvgPrice
+from book
+group by bookGener
+
+--Task 4.11: Show only the library names that own MORE THAN 1 books.
+--Tables: Library and Book
+select libraryName, count(*) as BookCount
+from librarys
+join book  on libraryID = librID
+group by libraryID, libraryName
+having count(*) > 1;
+
+--Task 4.12: Show only the members' full names who have borrowed MORE THAN 0 book.
+--Tables: Member and Loan
+select MfullName, count(*) as BorrowCount
+from members 
+join Borrowings on memberId = personID
+group by memberId, MfullName
+having count(*) > 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
