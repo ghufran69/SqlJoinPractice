@@ -931,6 +931,62 @@ group by MfullName
 having count(*)>=1
 order by MfullName asc
 
+--Task 5.4: For each book, show the title, total number of borrows, and average review
+--rating. Show only books that have been borrowed at least once AND have an average
+--rating above 3. Order by average rating from highest to lowest.
+--Tables: Book, Loan, Review
+--Hint: Use LEFT JOIN so books with no reviews still appear — then HAVING filters them out
+--Two conditions in HAVING: HAVING COUNT(...) >= 0 AND AVG(...) > 3
+select bookID ,bookTitle ,count(distinct Loandat) as borrowCount ,
+avg(rating) as avgReviews 
+from book 
+join Borrowings on book.bookID=Borrowings.bookSSN
+join ReviewBook on book.bookID=ReviewBook.BookNum
+join reviews on ReviewBook.ReviewID=reviews.ReviewID
+group by bookID ,bookTitle
+having count(distinct Loandat) >0 and avg(rating)>3
+order by avgReviews desc
+
+--Task 5.5: For each genre, show the total number of books, the average price, and the
+--cheapest price. Show only genres where the average price is between 15 and 50. Order
+--by average price from lowest to highest.
+--Hint: HAVING AVG(Price) BETWEEN 15 AND 50
+select bookID,bookGener, count(*) as bookCount ,
+avg(price) as AvgPrice ,
+min(price) as minPrice from book
+group by bookID,bookGener 
+having avg(price) between 15 and 50
+order by AvgPrice asc
+
+
+--Task 5.6 — Challenge: Build a complete library summary report. For each library
+--show: library name, city (Location), total number of books, total number of staff, total
+--number of loans ever made, and total fines collected. Show only libraries that have had
+--at least one loan. Order by total loans from highest to lowest.
+--Tables needed: Library, Book, Staff, Loan, Payment — five tables
+--Hint: Use LEFT JOIN for all joins so libraries with missing data still appear
+--Hint: Use COUNT(DISTINCT ...) for books, staff, and loans to avoid inflated counts from multiple joins
+--Note: This is the hardest query in the workbook — think through each join carefully before writing
+select libraryName ,libLocation,
+count(distinct bookID) as totalbook ,
+count(distinct staffID) as totalstaff,
+count(distinct loanDate) as totalloans ,
+sum(Amount) as totalAmount
+from librarys
+left join book on librID=librarys.libraryID
+left join Borrowings on book.bookID=Borrowings.bookSSN
+left join staff on librarys.libraryID =staff.libID
+left join Payments on Payments.LoanDa=Borrowings.Loandat
+left join loans on loans.DueDate=Borrowings.Loandat
+group by libraryName ,libLocation
+having count(loanDate)<=1
+order by totalloans desc
+
+
+
+
+
+
 
 
 
