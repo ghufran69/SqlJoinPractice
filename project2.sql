@@ -977,9 +977,9 @@ left join book on librID=librarys.libraryID
 left join Borrowings on book.bookID=Borrowings.bookSSN
 left join staff on librarys.libraryID =staff.libID
 left join Payments on Payments.LoanDa=Borrowings.Loandat
-left join loans on loans.DueDate=Borrowings.Loandat
+left join loans on loans.loanDate=Borrowings.Loandat
 group by libraryName ,libLocation
-having count(loanDate)<=1
+having count(loanDate)>=1
 order by totalloans desc
 
 
