@@ -1,4 +1,4 @@
-﻿    
+﻿      
 
 -- DAY 1
 --part 1 ,task 1.1 Display all records from the Libraries table
@@ -865,6 +865,38 @@ from members
 join Borrowings on memberId = personID
 group by memberId, MfullName
 having count(*) > 0;
+
+--Task 4.13: Show only the book titles that have an average rating ABOVE 4.
+--Tables: Book and Review
+select bookTitle,avg(rating) as avgRating 
+from book 
+join ReviewBook on ReviewBook.BookNum=book.bookID
+join reviews on ReviewBook.ReviewID=reviews.ReviewID
+group by bookTitle,
+having avg(rating)>4
+
+--Task 4.14: Show only the genres where more than 3 loans have been made in total.
+--Tables: Book and Loan
+select bookGener,count(*) as TotalLoans from book
+join Borrowings on Borrowings.bookSSN=book.bookID
+group by bookGener
+having count(*)>3
+
+--Task 4.15: Show only the libraries where the total fines collected from their books are MORE THAN 1.500.
+--Tables: Library, Book, Loan, and Payment — four tables
+--Hint: Join all four in a chain: Library → Book → Loan → Payment
+
+select libraryID ,sum(Amount) as totalFine 
+from librarys 
+join  book on book.librID=librarys.libraryID
+join Borrowings on Borrowings.bookSSN=book.bookID
+join loans on loans.loanDate=Borrowings.Loandat
+join Payments on Payments.LoanDa=loans.loanDate
+group by libraryID
+having sum(Amount)>1.500
+
+
+--Section 5 — Putting It All Together
 
 
 
