@@ -897,13 +897,39 @@ having sum(Amount)>1.500
 
 
 --Section 5 — Putting It All Together
+--Task 5.1: Count available books (WHERE IsAvailable = 1) per genre. Show only
+--genres with more than 1 available book. Order the results from most available books to fewest.
+--Clauses needed: FROM → WHERE → GROUP BY → HAVING → ORDER BY
+
+select bookGener, count(*) as AvailableCount from book
+where bookIsAvaibale=1
+group by bookGener having count(*)>1 
+order by AvailableCount desc
 
 
+--Task 5.2: For each library, show the library name and the total number of loans ever
+--made from its books. Show only libraries that have had more than 1 loans. Order by loan count from highest to lowest.
+--Tables: Library, Book, Loan
+--Clauses needed: FROM → JOIN → JOIN → GROUP BY → HAVING → ORDER BY
+select libraryName , count(*) as LoanCount from librarys
+join book on librarys.libraryID=book.librID
+join Borrowings on Borrowings.bookSSN=book.bookID
+join loans on loans.loanDate=Borrowings.Loandat
+group by libraryName having count(*)>0
+order by LoanCount desc
 
-
-
-
-
+--Task 5.3: Show each member's name and how many overdue loans they have (Status = 'Overdue').
+--Show only members who have at least 1 overdue loan. Order alphabetically by name.
+--Tables: Member and Loan
+--Hint: WHERE filters to Overdue rows first, then you group and count
+--member-borrowing-loans
+select MfullName, count(*) as loansCount from members 
+join Borrowings on members.memberId=Borrowings.personID
+join loans on Borrowings.Loandat=loans.loanDate
+where loanStatuse ='Overdue'
+group by MfullName
+having count(*)>=1
+order by MfullName asc
 
 
 
